@@ -19,9 +19,11 @@ class Template
 {
     use \Enjoys\Traits\Options;
 
-    private $templateDir;
+    private string $templateDir;
     private array $vars = [];
     private array $globalVars = [];
+    private array $exludedCss = [];
+    private array $exludedJs = [];
 
     public function __construct($templateDir = __DIR__)
     {
@@ -70,6 +72,10 @@ class Template
                 $this->getOptions()
         );
         $this->vars = [];
+        
+        $this->exludedCss = $content->getExludedCss();
+        $this->exludedJs = $content->getExludedJs();
+        
         return $content->getHtml();
     }
 }

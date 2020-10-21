@@ -19,10 +19,16 @@ class Content
 {
     use \Enjoys\Traits\Options;
 
-    protected $content;
+    protected string $content;
+    protected array $exludedCss = [];
+    protected array $exludedJs = [];
 
-    public function __construct($path, $vars, array $options = [])
+    public function __construct(string $path, array $vars, array $options = [])
     {
+        if (!file_exists($path)) {
+            throw new Exception(sprintf("Нет файла в по указанному пути: %s", $path));
+        }
+
         $this->setOptions($options);
 
         foreach ($vars as $k => $v) {
@@ -33,13 +39,34 @@ class Content
         require($path);
         $this->content = ob_get_contents();
         ob_end_clean();
-    }
 
-    public function getHtml()
-    {
+        if ($this->getOption('excludeCss') === true) {
+            $exludedCss = Formatter::excludeCss($this->content);
+            $this->exludedCss = $exludedCss['css'];
+            $this->content = $exludedCss['content'];
+        }
+        if ($this->getOption('excludeJs') === true) {
+            $exludedJs = Formatter::excludeCss($this->content);
+            $this->exludedJs = $exludedJs['js'];
+            $this->content = $exludedJs['content'];
+        }
         if ($this->getOption('sanitizeOutput') === true) {
             $this->content = Formatter::sanitize($this->content);
         }
+    }
+
+    public function getHtml(): string
+    {
         return $this->content;
+    }
+
+    public function getExludedCss(): array
+    {
+        return $this->exludedCss;
+    }
+
+    public function getExludedJs(): array
+    {
+        return $this->exludedJs;
     }
 }

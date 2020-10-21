@@ -35,6 +35,7 @@ namespace Enjoys\Templater;
  */
 class Formatter
 {
+
     public static function sanitize($buffer)
     {
         $search = array(
@@ -50,7 +51,7 @@ class Formatter
             ''
         );
 
-        $blocks = \preg_split('/(<\/?pre[^>]*>)/', $buffer, -1, \PREG_SPLIT_DELIM_CAPTURE);
+        $blocks = \preg_split('/(<\/?pre[^>]*>)/', $buffer, 0, \PREG_SPLIT_DELIM_CAPTURE);
         $result = '';
         foreach ($blocks as $i => $block) {
             if ($i % 4 == 2) {
@@ -61,5 +62,38 @@ class Formatter
         }
 
         return $result;
+    }
+
+    public static function excludeCss($content)
+    {
+        $styles = [];
+        $css = [];
+        preg_match_all("/<style[^>]*?>.*?<\/style>/simu", $content, $styles);
+        foreach ($styles[0] as $style) {
+            $minify = true;
+            $move = true;
+            //var_dump($script);
+            if (strpos($style, '//SKIP_MINIFY//') !== false) {
+                $minify = false;
+            }
+
+            if (strpos($style, '//NOMOVE//') !== false) {
+                $move = false;
+            }
+
+            if ($move === true) {
+                $content = str_replace($style, "\n\r", $content);
+                $css[] = [
+                    'style' => $style,
+                    'minify' => $minify
+                ];
+                //\Enjoys\Core\Minify::addCSS($style, $minify);
+            }
+        }
+
+        return [
+            'content' => $content,
+            'css' => $css
+        ];
     }
 }
