@@ -61,6 +61,10 @@ class Template
             throw new Exception(sprintf("Нет файла в по указанному пути: %s", $tpl));
         }
 
+        $this->setOptions([
+            'excludeCss' => false,
+            'excludeJs' => false,
+        ]);
         return $this->getContent($tpl);
     }
 
@@ -72,10 +76,11 @@ class Template
                 $this->getOptions()
         );
         $this->vars = [];
-        
-        $this->exludedCss = $content->getExludedCss();
-        $this->exludedJs = $content->getExludedJs();
-        
+
+//        $this->exludedCss = $content->getExludedCss();
+//        $this->exludedJs = $content->getExludedJs();
+        // _var_dump($path, Extern\CSS::get());
+
         return $content->getHtml();
     }
 }

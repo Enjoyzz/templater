@@ -20,8 +20,6 @@ class Content
     use \Enjoys\Traits\Options;
 
     protected string $content;
-    protected array $exludedCss = [];
-    protected array $exludedJs = [];
 
     public function __construct(string $path, array $vars, array $options = [])
     {
@@ -40,33 +38,22 @@ class Content
         $this->content = ob_get_contents();
         ob_end_clean();
 
-        if ($this->getOption('excludeCss') === true) {
-            $exludedCss = Formatter::excludeCss($this->content);
-            $this->exludedCss = $exludedCss['css'];
-            $this->content = $exludedCss['content'];
-        }
-        if ($this->getOption('excludeJs') === true) {
-            $exludedJs = Formatter::excludeCss($this->content);
-            $this->exludedJs = $exludedJs['js'];
-            $this->content = $exludedJs['content'];
-        }
-        if ($this->getOption('sanitizeOutput') === true) {
-            $this->content = Formatter::sanitize($this->content);
-        }
     }
 
     public function getHtml(): string
     {
+
+        if ($this->getOption('excludeCss') === true) {
+            $this->content = Formatter::excludeCss($this->content);
+        }
+        if ($this->getOption('excludeJs') === true) {
+            $this->content = Formatter::excludeJs($this->content);
+        }
+        if ($this->getOption('sanitizeOutput') === true) {
+            $this->content = Formatter::sanitize($this->content);
+        }
+        
         return $this->content;
     }
 
-    public function getExludedCss(): array
-    {
-        return $this->exludedCss;
-    }
-
-    public function getExludedJs(): array
-    {
-        return $this->exludedJs;
-    }
 }

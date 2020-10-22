@@ -83,17 +83,18 @@ class Formatter
 
             if ($move === true) {
                 $content = str_replace($style, "\n\r", $content);
-                $css[] = [
-                    'style' => $style,
-                    'minify' => $minify
-                ];
+//                $css[] = [
+//                    'style' => $style,
+//                    'minify' => $minify
+//                ];
                 //\Enjoys\Core\Minify::addCSS($style, $minify);
+                Extern\CSS::addInternal($style);
             }
         }
-
-        return [
-            'content' => $content,
-            'css' => $css
-        ];
+        return $content;
+//        return [
+//            'content' => $content,
+//            'css' => $css
+//        ];
     }
 }
