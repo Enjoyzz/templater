@@ -8,7 +8,9 @@
 
 declare(strict_types=1);
 
-namespace Enjoys\Templater;
+namespace Enjoys\SimplePhpTemplate;
+
+use Enjoys\Traits\Options;
 
 /**
  * Description of Template
@@ -17,70 +19,59 @@ namespace Enjoys\Templater;
  */
 class Template
 {
-    use \Enjoys\Traits\Options;
+    use Options;
 
-    private string $templateDir;
+    private string $template_dir;
     private array $vars = [];
-    private array $globalVars = [];
-    private array $exludedCss = [];
-    private array $exludedJs = [];
 
-    public function __construct($templateDir = __DIR__)
+    /**
+     * Template constructor.
+     * @param string $template_dir
+     */
+    public function __construct(string $template_dir)
     {
-        $this->setBaseTemplateDir($templateDir);
+        $this->template_dir = $template_dir;
     }
 
-    public function setBaseTemplateDir($templateDir)
-    {
-        $this->templateDir = $templateDir;
-    }
-
+    /**
+     * @param string $name
+     * @param mixed $value
+     */
     public function assign(string $name, $value): void
     {
         $this->vars[$name] = $value;
     }
 
-    public function assignGlobal(string $name, $value): void
+    /**
+     * @param string $name
+     * @param string $template_path
+     * @throws TemplateException
+     */
+    final public function fetch(string $name, string $template_path): void
     {
-        $this->globalVars[$name] = $value;
+        $this->assign($name, $this->getContent($template_path));
     }
 
-    final public function fetch($variable, $template)
+    /**
+     * @param string $template_path
+     * @return string
+     * @throws TemplateException
+     */
+    final public function display(string $template_path): string
     {
-        if (!file_exists($template)) {
-            throw new Exception(sprintf("Нет файла в по указанному пути: %s", $template));
-        }
-        $this->assign($variable, $this->getContent($template));
+        return $this->getContent($this->template_dir . '/' . $template_path);
     }
 
-    final public function display($template)
+    /**
+     * @param string $path
+     * @return string
+     * @throws TemplateException
+     */
+    private function getContent(string $path): string
     {
-        $tpl = $this->templateDir . $template;
-
-        if (!file_exists($tpl)) {
-            throw new Exception(sprintf("Нет файла в по указанному пути: %s", $tpl));
-        }
-
-        $this->setOptions([
-            'excludeCss' => false,
-            'excludeJs' => false,
-        ]);
-        return $this->getContent($tpl);
-    }
-
-    private function getContent($path)
-    {
-        $content = new Content(
-                $path,
-                (array) $this->vars + (array) $this->globalVars,
-                $this->getOptions()
-        );
+        $content = new Content($path, $this->vars);
+        $content->setOptions($this->getOptions());
         $this->vars = [];
-
-//        $this->exludedCss = $content->getExludedCss();
-//        $this->exludedJs = $content->getExludedJs();
-        // _var_dump($path, Extern\CSS::get());
-
         return $content->getHtml();
     }
 }

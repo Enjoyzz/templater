@@ -1,7 +1,8 @@
 # PHP Templater
 ## Usage
+
 ```php
-$tpl = new \Enjoys\Templater\Template(__DIR__.'/template/');
+$tpl = new \Enjoys\SimplePhpTemplate\Template(__DIR__.'/template/');
 $tpl->setOption('sanitizeOutput', true);
 
 //$site->title

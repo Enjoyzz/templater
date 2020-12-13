@@ -8,14 +8,14 @@
 
 declare(strict_types=1);
 
-namespace Enjoys\Templater;
+namespace Enjoys\SimplePhpTemplate;
 
 /**
  * Description of Exception
  *
  * @author deadl
  */
-class Exception extends \Exception
+class TemplateException extends \Exception
 {
     //put your code here
 }

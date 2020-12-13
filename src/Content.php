@@ -1,14 +1,9 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 declare(strict_types=1);
 
-namespace Enjoys\Templater;
+namespace Enjoys\SimplePhpTemplate;
+
+use Enjoys\Traits\Options;
 
 /**
  * Description of Content
@@ -17,43 +12,64 @@ namespace Enjoys\Templater;
  */
 class Content
 {
-    use \Enjoys\Traits\Options;
+    use Options;
 
-    protected string $content;
+    private \SplFileInfo $path;
 
-    public function __construct(string $path, array $vars, array $options = [])
+
+    /**
+     * Content constructor.
+     * @param string $path
+     * @param array $vars
+     * @throws TemplateException
+     */
+    public function __construct(string $path, array $vars)
     {
-        if (!file_exists($path)) {
-            throw new Exception(sprintf("Нет файла в по указанному пути: %s", $path));
+        $this->path = new \SplFileInfo($path);
+
+        if (!$this->path->isFile()) {
+            throw new TemplateException(sprintf("Нет файла в по указанному пути: %s", $this->path->getPathname()));
         }
 
-        $this->setOptions($options);
-
-        foreach ($vars as $k => $v) {
-            $$k = $v;
-        }
-
-        ob_start();
-        require($path);
-        $this->content = ob_get_contents();
-        ob_end_clean();
-
+        $this->initVars($vars);
     }
 
+    /**
+     * @param iterable $vars
+     * @throws TemplateException
+     */
+    private function initVars(iterable $vars): void
+    {
+        foreach ($vars as $k => $v) {
+            if (is_int($k)) {
+                throw new TemplateException('Недопустимый индекс для переменной, должен быть string а не int');
+            }
+            $this->$k = $v;
+        }
+    }
+
+
+    /**
+     * @return string
+     */
     public function getHtml(): string
     {
+        ob_start();
+        require($this->path->getRealPath());
+        $content = ob_get_contents();
+        ob_end_clean();
 
-        if ($this->getOption('excludeCss') === true) {
-            $this->content = Formatter::excludeCss($this->content);
-        }
-        if ($this->getOption('excludeJs') === true) {
-            $this->content = Formatter::excludeJs($this->content);
-        }
+//        if ($this->getOption('excludeCss') === true) {
+//            $content = Formatter::excludeCss($content);
+//        }
+//        if ($this->getOption('excludeJs') === true) {
+//            $content = Formatter::excludeJs($content);
+//        }
         if ($this->getOption('sanitizeOutput') === true) {
-            $this->content = Formatter::sanitize($this->content);
+            $content = Formatter::sanitize($content);
         }
-        
-        return $this->content;
+
+        return $content;
     }
 
 }
